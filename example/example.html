@@ -1,99 +1,170 @@
 <!DOCTYPE html>
-<svg width="960" height="500"></svg>
+<!DOCTYPE html>
+<html>
+<head>
+<title>example</title>
+<meta charset="utf-8">
 <script src="../lib/d3-v4.7.4.min.js"></script>
+</head>
+<body>
+<svg width="960" height="500"></svg>
 <script>
-
 var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height"),
-    color = d3.scaleOrdinal(d3.schemeCategory10);
+	width = +svg.attr("width"),
+	height = +svg.attr("height");
+	// color = d3.scaleOrdinal(d3.schemeCategory10);
 
-var a = {id: "a"},
-    b = {id: "b"},
-    c = {id: "c"},
-    nodes = [a, b, c],
-    links = [];
+var a = {id: "a", depth: 0},
+	b = {id: "b", depth: 1},
+	c = {id: "c", depth: 1},
+	d = {id: "d", depth: 2},
+	e = {id: "e", depth: 2},
+	f = {id: "f", depth: 2};
+	nodes = [],
+	links = [];
 
 var simulation = d3.forceSimulation(nodes)
-    .force("charge", d3.forceManyBody().strength(-1000))
-    .force("link", d3.forceLink(links).distance(200))
-    .force("x", d3.forceX())
-    .force("y", d3.forceY())
-    .alphaTarget(1)
-    .on("tick", ticked);
+	.force("charge", d3.forceManyBody().strength(-1000))
+	.force("link", d3.forceLink(links).distance(200))
+	.force("x", d3.forceX())
+	.force("y", d3.forceY())
+	.alphaTarget(1)
+	.on("tick", ticked);
 
-var g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")"),
-    link = g.append("g").attr("stroke", "#000").attr("stroke-width", 1.5).selectAll(".link"),
-    node = g.append("g").attr("stroke", "#fff").attr("stroke-width", 1.5).selectAll(".node");
+var g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2   + ")"),
+	link = g.append("g").attr("stroke", "#000").attr("stroke-width", 1.5).selectAll(".link"),
+	node = g.append("g").attr("stroke", "#fff").attr("stroke-width", 1.5).selectAll(".node");
 
+nodes.push(a)
+// d3.forceCenter()
 restart();
 
 d3.timeout(function() {
-  links.push({source: a, target: b}); // Add a-b.
-  links.push({source: b, target: c}); // Add b-c.
-  links.push({source: c, target: a}); // Add c-a.
-  restart();
+	nodes.push(b);
+	links.push({source: a, target: b});
+	restart();
 }, 1000);
 
-d3.interval(function() {
-  nodes.pop(); // Remove c.
-  links.pop(); // Remove c-a.
-  links.pop(); // Remove b-c.
-  restart();
-}, 2000, d3.now());
+d3.timeout(function() {
+	nodes.push(c);
+	links.push({source: a, target: c});
+	restart();
+}, 2000);
 
+d3.timeout(function() {
+	nodes.push(d);
+	links.push({source: b, target: d});
+	restart();
+}, 3000);
 
-d3.interval(function() {
-  nodes.push(c); // Re-add c.
-  links.push({source: b, target: c}); // Re-add b-c.
-  links.push({source: c, target: a}); // Re-add c-a.
-  restart();
-}, 2000, d3.now() + 1000);
+d3.timeout(function() {
+	nodes.push(e);
+	nodes.push(f);
+	links.push({source: b, target: e});
+	links.push({source: c, target: f});
+	restart();
+}, 4000);
+
+function get_color(d){
+	var color = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
+	return color[d.depth];
+}
+
+// 创建箭头
+var defs = svg.append("defs");
+var arrow_path = "M2,2 L10,6 L2,10 L6,6 L2,2";
+var arrowMarker = defs.append("marker")
+	.attr("id","arrow")
+	.attr("markerUnits","strokeWidth")
+	.attr("markerWidth","6")
+	.attr("markerHeight","12")
+	.attr("viewBox","0 0 12 12")
+	.attr("refX","18")
+	.attr("refY","6")
+	.attr("orient","auto");
+arrowMarker.append("path")
+	.attr("d",arrow_path)
+	.attr("fill","#333");
+
 
 function restart() {
+	// Apply the general update pattern to the nodes.
+	node = node.data(nodes, function(d) { return d.id;});
 
-  // Apply the general update pattern to the nodes.
-  node = node.data(nodes, function(d) { return d.id;});
+	node.exit().transition()
+		.attr("r", 0)
+		.remove();
 
-  node.exit().transition()
-      .attr("r", 0)
-      .remove();
+	// // 为链接添加节点
+	// node = node.enter().append("g")
+	// 		.attr("class", "node")
+	// 		// .attr("data-d", function(d) { return d.id; })
+	// 		// .call()
+	// 		;
+	// node.append("circle")
+	// 	.attr("r", 8)
+	// 	.attr("fill", function(d) { return get_color(d); })
+	// 	;
+	// node.append("text")
+	// 	.attr("fill", "#333")
+	// 	.attr("x", 12)
+	// 	.attr("dy", ".35em")
+	// 	.text(function(d) { return d.id; })
+	// 	;
 
-  node = node.enter().append("circle")
-      .attr("fill", function(d) { return color(d.id); })
-      .call(function(node) { node.transition().attr("r", 8); })
-    .merge(node);
+	node = node.enter().append("circle")
+		.attr("fill", function(d) { return get_color(d); })
+		.attr("data-d", function(d) { return d.id; })
+		.on("click", click)
+		.call(function(node) { node.transition().attr("r", 8); })
+		.merge(node);
 
-  // Apply the general update pattern to the links.
-  link = link.data(links, function(d) { return d.source.id + "-" + d.target.id; });
+	// Apply the general update pattern to the links.
+	link = link.data(links, function(d) { return d.source.id + "-" + d.target.id; });
 
-  // Keep the exiting links connected to the moving remaining nodes.
-  link.exit().transition()
-      .attr("stroke-opacity", 0)
-      .attrTween("x1", function(d) { return function() { return d.source.x; }; })
-      .attrTween("x2", function(d) { return function() { return d.target.x; }; })
-      .attrTween("y1", function(d) { return function() { return d.source.y; }; })
-      .attrTween("y2", function(d) { return function() { return d.target.y; }; })
-      .remove();
+	// Keep the exiting links connected to the moving remaining nodes.
+	link.exit().transition()
+		.attr("stroke-opacity", 0)
+		.attrTween("x1", function(d) { return function() { return d.source.x; }; })
+		.attrTween("x2", function(d) { return function() { return d.target.x; }; })
+		.attrTween("y1", function(d) { return function() { return d.source.y; }; })
+		.attrTween("y2", function(d) { return function() { return d.target.y; }; })
+		.remove();
 
-  link = link.enter().append("line")
-      .call(function(link) { link.transition().attr("stroke-opacity", 1); })
-    .merge(link);
+	link = link.enter().append("line")
+		.attr("stroke", "#333")
+		.attr("stroke-width", 2)
+		.attr("marker-end","url(#arrow)") // 添加箭头
+		.call(function(link) {
+			link.transition().attr("stroke-opacity", 1);
+		})
+		.merge(link);
 
-  // Update and restart the simulation.
-  simulation.nodes(nodes);
-  simulation.force("link").links(links);
-  simulation.alpha(1).restart();
+	// Update and restart the simulation.
+	simulation.nodes(nodes);
+	simulation.force("link").links(links);
+	simulation.alpha(1).restart();
 }
 
 function ticked() {
-  node.attr("cx", function(d) { return d.x; })
-      .attr("cy", function(d) { return d.y; })
+	node.attr("transform", function(d) {
+		return "translate(" + d.x + "," + d.y + ")";
+	});
 
-  link.attr("x1", function(d) { return d.source.x; })
-      .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; });
+	// node.attr("cx", function(d) { return d.x; })
+	// 	.attr("cy", function(d) { return d.y; });
+
+	link.attr("x1", function(d) { return d.source.x; })
+		.attr("y1", function(d) { return d.source.y; })
+		.attr("x2", function(d) { return d.target.x; })
+		.attr("y2", function(d) { return d.target.y; });
+}
+
+function click(node) {
+	console.log(node)
 }
 
 </script>
+
+</body>
+</html>
