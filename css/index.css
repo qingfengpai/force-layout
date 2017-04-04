@@ -1,17 +1,17 @@
 svg {
 	border: 1px solid red;
 }
-#node-container {
-	stroke: #fff;
-	stroke-width: 1.5;
+
+@keyframes show {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+.show {
+	animation: show 1s ease;
 }
 
-
-#line-container {
-	stroke: #000;
-	stroke-width: 1.5;
-}
 .line {
+	animation: show 1s ease;
 	stroke: #333;
 	stroke-width: 1;
 	marker-end: url(#arrow);
