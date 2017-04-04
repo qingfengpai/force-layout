@@ -1,214 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1,maximum-scale=1"/>
-  <title>Force Directed Graph</title>
-  <script type="text/javascript" src="../lib/d3-v3.2.8.js"></script>
+<title>index</title>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="../css/index.css">
+<script src="../lib/d3-v4.7.4.min.js"></script>
+<!-- <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script> -->
+<script src="../lib/index.js"></script>
 </head>
 <body>
-<style type="text/css">
-  .node {
-  cursor: pointer;
-  stroke: #3182bd;
-  stroke-width: 1.5px;
-}
+<svg width="960" height="500"></svg>
+<script>
+// 事件调度器
+var G_dispatch = d3.dispatch("initialize", "main");
 
-.link {
-  fill: none;
-  stroke: #9ecae1;
-  stroke-width: 1.5px;
-}
-</style>
-</body>
-<script type="text/javascript">
+// 注册事件监听
+G_dispatch.on("initialize", initialize);
+G_dispatch.on("main", main);
 
-function flatten(root) {
-  var nodes = [];
-  function traverse(node, depth) {
-    if (node.children) {
-      node.children.forEach(function(child) {
-        child.parent = node;
-        traverse(child, depth + 1);
-      });
-    }
-    node.depth = depth;
-    nodes.push(node);
-  }
-  traverse(root, 1);
-  return nodes;
-}
+// 根容器
+var G_svg = d3.select("svg")
+	.call(d3.zoom()
+	.scaleExtent([1/2, 8])	// 缩放比例
+	.on("zoom", zoomed))	// 缩放事件
+	;
 
-function tick(){
-  link.attr("x1", function(d) { return d.source.x; })
-      .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; });
-  node.attr("cx", function(d) { return d.x; })
-      .attr("cy", function(d) { return d.y; });
-}
+// 为了使得布局居中
+let width = +G_svg.attr("width");
+let height = +G_svg.attr("height");
 
-var w = 1200,
-  h = 800,
-  z = d3.scale.category20();
+// 创建, 配置力导引模拟器
+var G_simulation = d3.forceSimulation(G_nodes)
+	.force("charge", d3.forceManyBody().strength(-1000))
+	.force("link", d3.forceLink(G_links).distance(function(d){
+		console.log(d);
+		return 100;
+	}))
+	.force("x", d3.forceX())
+	.force("y", d3.forceY())
+	// 设置布局参考位置居中
+	.force("center", d3.forceCenter(width/2, height/2))
+	.alphaTarget(1)
+	.on("tick", ticked)
+	;
 
-var force = d3.layout.force()
-  .gravity(.05)
-  .distance(120)
-  .charge(-100)
-  .size([w, h])
-  .on('tick', tick);
+// 容器, link存线, node存节点
+var G_g = G_svg.append("g");
+var G_link = G_g.append("g")
+	.attr("stroke", "#000")
+	.attr("stroke-width", 1.5).selectAll(".link");
+var G_node = G_g.append("g")
+	.attr("stroke", "#fff")
+	.attr("stroke-width", 1.5).selectAll(".node");
 
-var svg = d3.select("body").append("svg")
-  .attr("width", w)
-  .attr("height", h);
-
-var link = svg.selectAll('.link'),
-  node = svg.selectAll('.node');
-
-function get_root(index){
-  if (index == 1) {
-    return {
-      "name": "flare",
-      "children": [
-        { "name": "analytics", "children":
-          [
-            {"name": "BetweennessCentrality", "size": 3534},
-            {"name": "SpanningTree", "size": 3416},
-            {"name": "ArrayInterpolator", "size": 1983}
-          ]
-        },
-        {"name": "ColorInterpolator", "size": 2047},
-        {"name": "DateInterpolator", "size": 1375}
-      ]
-    };
-  }
-  else if (index == 2) {
-    return {
-      "name": "flare",
-      "children": [
-        { "name": "analytics", "children":
-          [
-            {"name": "BetweennessCentrality", "size": 3534},
-            {"name": "SpanningTree", "size": 3416},
-            {"name": "ArrayInterpolator", "size": 1983}
-          ]
-        },
-        {"name": "ColorInterpolator", "children": [
-          {"name": "ISchedulable", "size": 1041},
-            {"name": "Parallel", "size": 5176},
-            {"name": "Pause", "size": 449}
-        ]},
-        {"name": "DateInterpolator", "size": 1375}
-      ]
-    };
-  }
-  return {
-    "name": "flare",
-    "children": [
-      { "name": "analytics", "children":
-        [
-          {"name": "BetweennessCentrality", "size": 3534},
-          {"name": "SpanningTree", "size": 3416},
-          {"name": "ArrayInterpolator", "size": 1983}
-        ]
-      }
-    ]
-  }
-}
-
-// 创建箭头
-var defs = svg.append("defs");
-var arrowMarker = defs.append("marker")
-            .attr("id","arrow")
-            .attr("markerUnits","strokeWidth")
-            .attr("markerWidth","6")
-            .attr("markerHeight","12")
-            .attr("viewBox","0 0 12 12")
-            .attr("refX","18")
-            .attr("refY","6")
-            .attr("orient","auto");
-var arrow_path = "M2,2 L10,6 L2,10 L6,6 L2,2";
-arrowMarker.append("path")
-      .attr("d",arrow_path)
-      .attr("fill","#333");
-
-// 更新页面
-function update(data) {
-  var nodes = flatten(data),
-    links = d3.layout.tree().links(nodes);
-
-  // Restart the force layout.
-  force.nodes(nodes).links(links).start();
-
-  // Update the links…
-  link = link.data(links);
-
-  // Enter any new links.
-  link.enter().insert("line", ".node")
-    .attr("class", "link")
-    .style("fill", "#3182bd")
-    .attr("x1", function(d) { return d.source.x; })
-    .attr("y1", function(d) { return d.source.y; })
-    .attr("x2", function(d) { return d.target.x; })
-    .attr("y2", function(d) { return d.target.y; })
-    // 添加箭头
-    .attr("stroke", "red")
-    .attr("stroke-width", 2)
-    .attr("marker-end","url(#arrow)");
-
-  // Exit any old links.
-  link.exit().remove();
-
-  // Update the nodes…
-  node = node.data(nodes);
-
-  // Exit any old nodes.
-    node.exit().remove();
-
-  // Enter any new nodes.
-  node.enter().append("circle")
-    .attr("class", "node")
-    .attr("cx", function(d) { return d.x; })
-    .attr("cy", function(d) { return d.y; })
-    .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
-    .on("click", click)   // 添加点击事件
-    .call(force.drag);
-
-  // 添加颜色
-  node.attr("data", function(d) { return d.depth; })
-  node.style("fill", color)
-
-  //(2)根据连线类型引用上面创建的标记
-  var path = svg.append("svg:g").selectAll("path")
-    .data(links)
-    .enter().append("svg:path")
-    .attr("class", function(d) { return "link " + d.type; })
-    .attr("marker-end", function(d) { return "url(#" + d.type + ")"; });
-}
+// 所有的节点和连接线
+var G_nodes = [];
+var G_links = [];
 
 
-function click(e) {
-  console.log(e)
-}
+G_dispatch.call("initialize");
+G_dispatch.call("main");
 
-// Color leaf nodes orange, and packages white or blue.
-function color(d) {
-  var colors = ['red', 'blue', 'yellow', 'orange'];
-  return colors[d.depth-1];
-}
-
-data = get_root(0)
-update(data)
-
-setTimeout(function(){
-  data = get_root(1)
-  update(data)
-}, 5000)
-
-setTimeout(function(){
-  data = get_root(2)
-  update(data)
-}, 10000)
 </script>
+</body>
 </html>
