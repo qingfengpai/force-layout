@@ -1,3 +1,33 @@
 svg {
 	border: 1px solid red;
 }
+#node-container {
+	stroke: #fff;
+	stroke-width: 1.5;
+}
+
+
+#line-container {
+	stroke: #000;
+	stroke-width: 1.5;
+}
+.line {
+	stroke: #333;
+	stroke-width: 1;
+	marker-end: url(#arrow);
+}
+
+
+#arrow {
+	markerUnits: strokeWidth;
+	markerWidth: 6;
+	markerHeight: 12;
+	viewBox: 0 0 12 12;
+	refX: 18;
+	refY: 6;
+	orient: auto;
+}
+#arrow path {
+	d: M2,2 L10,6 L2,10 L6,6 L2,2;
+	fill: #333;
+}

@@ -9,20 +9,27 @@
 <script src="../lib/index.js"></script>
 </head>
 <body>
-<svg width="960" height="500"></svg>
+<svg width="960" height="500">
+	<!-- 图 -->
+	<g id="container">
+		<g id="line-container"></g>
+		<g id="node-container"></g>
+	</g>
+	<!-- 箭头 -->
+	<defs><marker id="arrow"><path></path></marker></defs>
+</svg>
 <script>
 // 事件调度器
-var G_dispatch = d3.dispatch("initialize", "main");
+var G_dispatch = d3.dispatch("main");
 
-// 注册事件监听
-G_dispatch.on("initialize", initialize);
 G_dispatch.on("main", main);
 
 // 根容器
 var G_svg = d3.select("svg")
 	.call(d3.zoom()
-	.scaleExtent([1/2, 8])	// 缩放比例
-	.on("zoom", zoomed))	// 缩放事件
+		.scaleExtent([1/2, 8])	// 缩放比例
+		.on("zoom", zoomed)		// 缩放事件
+	)
 	;
 
 // 为了使得布局居中
@@ -30,12 +37,9 @@ let width = +G_svg.attr("width");
 let height = +G_svg.attr("height");
 
 // 创建, 配置力导引模拟器
-var G_simulation = d3.forceSimulation(G_nodes)
-	.force("charge", d3.forceManyBody().strength(-1000))
-	.force("link", d3.forceLink(G_links).distance(function(d){
-		console.log(d);
-		return 100;
-	}))
+var G_simulation = d3.forceSimulation()
+	.force("charge", d3.forceManyBody().strength(-20)) // 节点间的作用力
+	.force("link", d3.forceLink().distance(distance).strength(strength).iterations(10))
 	.force("x", d3.forceX())
 	.force("y", d3.forceY())
 	// 设置布局参考位置居中
@@ -45,20 +49,15 @@ var G_simulation = d3.forceSimulation(G_nodes)
 	;
 
 // 容器, link存线, node存节点
-var G_g = G_svg.append("g");
-var G_link = G_g.append("g")
-	.attr("stroke", "#000")
-	.attr("stroke-width", 1.5).selectAll(".link");
-var G_node = G_g.append("g")
-	.attr("stroke", "#fff")
-	.attr("stroke-width", 1.5).selectAll(".node");
+var G_g = G_svg.select("#container");
+var G_link = G_g.select("#line-container").selectAll(".link");
+var G_node = G_g.select("#node-container").selectAll(".node");
 
 // 所有的节点和连接线
 var G_nodes = [];
 var G_links = [];
 
 
-G_dispatch.call("initialize");
 G_dispatch.call("main");
 
 </script>
