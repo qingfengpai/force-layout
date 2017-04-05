@@ -5,7 +5,6 @@
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="../css/index.css">
 <script src="../lib/d3-v4.7.4.min.js"></script>
-<!-- <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script> -->
 <script src="../lib/index.js"></script>
 </head>
 <body>
@@ -16,7 +15,7 @@
 		<g id="node-container"></g>
 	</g>
 	<!-- 箭头 -->
-	<defs><marker id="arrow"><path></path></marker></defs>
+	<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#333"></path></marker></defs>
 </svg>
 <script>
 // 事件调度器
@@ -28,6 +27,10 @@ G_dispatch.on("main", main);
 var G_svg = d3.select("svg")
 	.call(d3.zoom()
 		.scaleExtent([1/2, 8])	// 缩放比例
+		// .filter(function(){
+		// 	// if (event.type == "wheel") { return true}
+		// 	// return false;
+		// })
 		.on("zoom", zoomed)		// 缩放事件
 	)
 	;
@@ -42,7 +45,7 @@ var G_simulation = d3.forceSimulation()
 	.force("link", d3.forceLink()
 		.distance(distance)
 		.strength(strength)
-		// .iterations(10)
+		.iterations(10)
 	)
 	.force("x", d3.forceX())
 	.force("y", d3.forceY())
