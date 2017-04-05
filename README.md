@@ -22,3 +22,10 @@
 ### question
 
 - 容器绑定了zoom事件，或circle同时绑定了drag事件，则circle的click事件失效。
+
+
+### bug
+
+- chrome 上 click 事件触发会出现问题，重启即可。Firefox正常。
+    - svg 绑定zoom事件，node绑定drag、click事件。
+    - 类似问题 https://github.com/d3/d3-zoom/issues/62
