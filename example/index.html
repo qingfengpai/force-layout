@@ -41,19 +41,30 @@ let height = +G_svg.attr("height");
 
 // 创建并配置力导引模拟器
 var G_simulation = d3.forceSimulation()
-	.force("charge", d3.forceManyBody().strength(-50)) // 节点间的作用力
+	.force("charge", d3.forceManyBody().strength(-1000)) // 节点间的作用力
+	// .force("collide",d3.forceCollide(
+	// 	function(d){
+	// 		return d.r + 8
+	// 	})
+	// 	.iterations(16)
+	// )
 	.force("link", d3.forceLink()
-		.distance(distance)
-		.strength(strength)
-		// .iterations(10)
+		.distance(100)
+		// .strength(strength)
+		.id( function(d) { return d.id; } )
 	)
-	.force("x", d3.forceX())
-	.force("y", d3.forceY())
-	// 设置布局参考位置居中
-	.force("center", d3.forceCenter(width/2, height/2))
-	.alphaTarget(1)
+	// .force("x", d3.forceX())
+	// .force("y", d3.forceY())
+	.force("xPos", d3.forceX(width/2))
+	.force("yPos", d3.forceY(height/2))
+	// // 设置布局参考位置居中
+	// .force("center", d3.forceCenter(width/2, height/2))
+	// .alphaTarget(.5)
 	.on("tick", ticked)
+
 	;
+
+G_simulation.stop();
 
 // 容器, link存线, node存节点
 var G_g = G_svg.select("#container");
