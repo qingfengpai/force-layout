@@ -19,6 +19,11 @@
 - [更多区别](http://www.w3school.com.cn/html5/html_5_canvas_vs_svg.asp)
 
 
+### 使用注意
+
+- 使用数组操作来维护GD_nodes，而非`GD_nodes = new_array`。
+
+
 ### question
 
 - 容器绑定了zoom事件，或circle同时绑定了drag事件，则circle的click事件失效。

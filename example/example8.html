@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>index</title>
+<meta charset="utf-8">
+<style type="text/css">
+.link {
+    stroke: #bbb;
+}
+.node circle{
+	pointer-events: all;
+	fill: black;
+	stroke-width: 0px;
+	r: 8px
+}
+h1 {
+	color: white;
+}
+</style>
+<script src="../lib/d3-v4.7.4.min.js"></script>
+</head>
+<body>
+</body>
+<script type="text/javascript">
+var w=960;
+var h=600;
+
+var svg=d3.select("body").append("svg");
+
+svg.attr('width',w)
+	.attr('height',h);
+
+// ensures branches sit beneath leaves
+svg.append("g").attr("id", "branches")
+svg.append("g").attr("id", "leaves")
+
+function new_node(id){
+	this.id = id;
+	this.x = w/2;
+	this.y = h/2;
+}
+function new_link(source,target){
+	this.source = source;
+	this.target = target;
+}
+
+var nodes = [];
+var links = [];
+
+var node;
+var circles;
+var link;
+var simulation = d3.forceSimulation()
+	.force("charge", d3.forceManyBody().strength(-500))
+	.force("link", d3.forceLink().distance(50)
+		.id(function(d) { return d.id; }))
+	.force("xPos", d3.forceX(w/2))
+	.force("yPos", d3.forceY(h/2))
+	.on('tick',ticked);
+
+simulation.stop();
+
+var newNode = new new_node(0);
+nodes.push(newNode);
+
+let timer = setInterval(function(){
+	var len = nodes.length - 1;
+	var i = Math.round(Math.random()*len);
+	addLeaf(i, nodes.length);
+
+	// var newNode = new new_node(nodes.length);
+	// nodes.push(newNode);
+	// var newLink = new new_link(i,nodes.length);
+	// links.push(newLink);
+	// addLeaf();
+}, 1000);
+
+setTimeout(function(){
+	clearInterval(timer);
+}, 20000);
+
+
+
+// var GD_uids = [];
+// function process(data) {
+// 	let per = 1000;
+// 	let count = data.length;
+// 	let index = 0;
+// 	let timer = setInterval(function(){
+// 		let s = data[index]['source'];
+// 		if (s && GD_uids.indexOf(s.id) == -1) {
+// 			GD_uids.push(s.id);
+// 			s.x = w/2;
+// 			s.y = h/2;
+// 			nodes.push(s);
+// 		}
+// 		let t = data[index]['target'];
+// 		if (t && GD_uids.indexOf(t.id) == -1) {
+// 			GD_uids.push(t.id);
+// 			t.x = w/2;
+// 			t.y = h/2;
+// 			nodes.push(t);
+// 		}
+// 		let link = data[index]['link'];
+// 		if (link) {
+// 			links.push(link);
+// 		}
+// 		index++
+// 		addLeaf();
+// 	}, per);
+
+// 	setTimeout(function(){
+// 		clearInterval(timer);
+// 	}, per*count);
+// }
+
+// function main() {
+// 	d3.request("../data/new.json")
+// 		.mimeType("application/json")
+// 		.response(function(xhr) {
+// 			let data = JSON.parse(xhr.responseText);
+// 			process(data);
+// 		})
+// 		.get()
+// 	;
+// }
+// main()
+
+
+function addLeaf(rootId,newId){
+	var newNode = new new_node(newId);
+	nodes.push(newNode);
+	var newLink = new new_link(rootId,newId);
+	links.push(newLink);
+
+	//adds newest leaf
+	node = svg.select("#leaves").selectAll(".node")
+			  .data(nodes)
+	var nodeEnter = node.enter().append("g")
+						.attr("class","node");
+
+	//draws circle on newest leaf
+	var circlesEnter = nodeEnter.append('circle')
+
+	node = nodeEnter.merge(node);
+	circles = d3.selectAll('circle');
+
+
+	//adds newest branch and draws it
+	link = svg.select("#branches").selectAll(".link")
+				.data(links)
+
+	var linkEnter = link.enter().append("line")
+						.attr("class","link")
+						.call(function(d){
+							console.log(d._groups[0])
+						})
+						;
+
+	link = linkEnter.merge(link);
+
+	simulation.stop();
+
+	simulation.nodes(nodes);
+
+	simulation.force("link")
+	.links(links);
+
+	simulation.alpha(1);
+
+	restartSim();
+}
+
+//starts up the simulation and sets up the way the leaves react to interaction
+function restartSim(){
+  simulation.restart();
+
+  circles.on('mouseover',function(d,i){
+	addLeaf(i,nodes.length)
+  })
+}
+
+function ticked() {
+  link
+	.attr("x1", function(d) { return d.source.x; })
+	.attr("y1", function(d) { return d.source.y; })
+	.attr("x2", function(d) { return d.target.x; })
+	.attr("y2", function(d) { return d.target.y; });
+
+  node.attr("transform", function(d) {
+  	return "translate(" + d.x + "," + d.y + ")";
+  });
+}
+
+</script>
+</html>

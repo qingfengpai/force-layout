@@ -8,7 +8,7 @@
 <script src="../lib/index.js"></script>
 </head>
 <body>
-<svg width="960" height="500">
+<svg width="960" height="600">
 	<!-- 图 -->
 	<g id="container">
 		<g id="line-container"></g>
@@ -27,41 +27,36 @@ G_dispatch.on("main", main);
 var G_svg = d3.select("svg")
 	.call(d3.zoom()
 		.scaleExtent([1/2, 8])	// 缩放比例
-		// .filter(function(){
-		// 	// if (event.type == "wheel") { return true}
-		// 	// return false;
-		// })
 		.on("zoom", zoomed)		// 缩放事件
 	)
 	;
 
 // 为了使得布局居中
-let width = +G_svg.attr("width");
-let height = +G_svg.attr("height");
+var w = +G_svg.attr("width");
+var h = +G_svg.attr("height");
 
 // 创建并配置力导引模拟器
 var G_simulation = d3.forceSimulation()
-	.force("charge", d3.forceManyBody().strength(-1000)) // 节点间的作用力
+	.force("charge", d3.forceManyBody().strength(-500)) // 节点间的作用力
 	// .force("collide",d3.forceCollide(
 	// 	function(d){
 	// 		return d.r + 8
 	// 	})
 	// 	.iterations(16)
 	// )
-	.force("link", d3.forceLink()
-		.distance(100)
-		// .strength(strength)
+	.force("link", d3.forceLink().distance(50)
 		.id( function(d) { return d.id; } )
+		.strength(strength)
 	)
 	// .force("x", d3.forceX())
 	// .force("y", d3.forceY())
-	.force("xPos", d3.forceX(width/2))
-	.force("yPos", d3.forceY(height/2))
-	// // 设置布局参考位置居中
-	// .force("center", d3.forceCenter(width/2, height/2))
-	// .alphaTarget(.5)
+	.force("xPos", d3.forceX(w/2))
+	.force("yPos", d3.forceY(h/2))
+	// 设置布局参考位置居中
+	.force("center", d3.forceCenter(w/2, h/2))
+	// .alphaTarget(1)
+	.velocityDecay(0.5)
 	.on("tick", ticked)
-
 	;
 
 G_simulation.stop();
@@ -74,6 +69,7 @@ var G_node = G_g.select("#node-container").selectAll(".node");
 // 所有的节点和连接线
 var GD_nodes = [];
 var GD_links = [];
+var GD_uids = [];
 
 
 G_dispatch.call("main");

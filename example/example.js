@@ -1,6 +1,7 @@
+
+
 var w=400;
 var h=400;
-
 
 var svg=d3.select("body").append("svg");
 
@@ -12,9 +13,9 @@ svg.append("g").attr("id", "branches")
 svg.append("g").attr("id", "leaves")
 
 function new_node(id){
-	this.id=id;
-	this.x=w/2;
-	this.y=h/2;
+	this.id = id;
+	this.x = w/2;
+	this.y = h/2;
 }
 function new_link(source,target){
 	this.source = source;
@@ -28,7 +29,8 @@ var node;
 var circles;
 var link;
 var simulation = d3.forceSimulation()
-	.force("link", d3.forceLink().distance(100).id(function(d) { return d.id; }))
+	.force("link", d3.forceLink().distance(100)
+		.id(function(d) { return d.id; }))
 	.force("charge", d3.forceManyBody().strength(-1000))
 	.force("xPos", d3.forceX(w/2))
 	.force("yPos", d3.forceY(h/2))
@@ -53,10 +55,11 @@ function addLeaf(rootId,newId){
 
 	//adds newest branch and draws it
 	link = svg.select("#branches").selectAll(".link")
-	.data(links)
+				.data(links)
 
 	var linkEnter = link.enter().append("line")
 						.attr("class","link");
+
 	link = linkEnter.merge(link);
 
 	//adds newest leaf
@@ -66,7 +69,7 @@ function addLeaf(rootId,newId){
 						.attr("class","node");
 
 	//draws circle on newest leaf
-	var circlesEnter=nodeEnter.append('circle')
+	var circlesEnter = nodeEnter.append('circle')
 
 	node = nodeEnter.merge(node);
 	circles = d3.selectAll('circle');
