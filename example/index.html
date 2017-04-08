@@ -5,7 +5,6 @@
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="../css/index.css">
 <script src="../lib/d3-v4.7.4.min.js"></script>
-<script src="../lib/index.js"></script>
 </head>
 <body>
 <svg width="960" height="600">
@@ -17,6 +16,9 @@
 	<!-- 箭头 -->
 	<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#333"></path></marker></defs>
 </svg>
+</body>
+<script src="../lib/util.js"></script>
+<script src="../lib/index.js"></script>
 <script>
 // 事件调度器
 var G_dispatch = d3.dispatch("main");
@@ -38,30 +40,15 @@ var h = +G_svg.attr("height");
 
 // 创建并配置力导引模拟器
 var G_simulation = d3.forceSimulation()
-	.force("charge", d3.forceManyBody().strength(-500)) // 节点间的作用力
-	// .force("collide",d3.forceCollide(
-	// 	function(d){
-	// 		return d.r + 8
-	// 	})
-	// 	.iterations(16)
-	// )
+	.force("charge", d3.forceManyBody()) // 节点间的作用力.strength(-200)
 	.force("link", d3.forceLink()
-		.distance(distance)
+		// .distance(20)
 		.id( function(d) { return d.id; } )
-		.strength(strength)
 	)
-	// .force("x", d3.forceX())
-	// .force("y", d3.forceY())
-	// .force("xPos", d3.forceX(w/2))
-	// .force("yPos", d3.forceY(h/2))
-	// 设置布局参考位置居中
-	.force("center", d3.forceCenter(w/2, h/2))
-	// .alphaTarget(1)
-	.velocityDecay(0.5)
+	.force("center", d3.forceCenter(w/2, h/2))	// 设置布局参考位置居中
 	.on("tick", ticked)
 	;
 
-G_simulation.stop();
 
 // 容器, link存线, node存节点
 var G_g = G_svg.select("#container");
@@ -78,5 +65,4 @@ var GD_link_id = [];
 G_dispatch.call("main");
 
 </script>
-</body>
 </html>

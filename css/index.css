@@ -10,6 +10,9 @@ svg {
 	animation: show 1s ease;
 }
 
+.userid {
+	font-size: 10px;
+}
 .line {
 	animation: show 1s ease;
 	stroke: #333;
