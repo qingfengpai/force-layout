@@ -9,7 +9,9 @@ svg {
 .show {
 	animation: show 1s ease;
 }
-
+.hide {
+	opacity: 0.2;
+}
 .userid {
 	font-size: 10px;
 }

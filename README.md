@@ -6,6 +6,10 @@
 - dispatch [事件调度机制](https://github.com/xswei/d3js_doc/tree/master/API/d3-dispatch-master)
 
 
+### 方案
+
+- 闭环问题: a-a-a, a-b-a-b-a
+
 ### event
 
 - drag
@@ -37,6 +41,7 @@
 
 
 ### json 示例
+
 ```json
 {
     "source": {

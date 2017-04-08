@@ -40,9 +40,9 @@ var h = +G_svg.attr("height");
 
 // 创建并配置力导引模拟器
 var G_simulation = d3.forceSimulation()
-	.force("charge", d3.forceManyBody()) // 节点间的作用力.strength(-200)
+	.force("charge", d3.forceManyBody().strength(-200)) // 节点间的作用力
 	.force("link", d3.forceLink()
-		// .distance(20)
+		.distance(20)
 		.id( function(d) { return d.id; } )
 	)
 	.force("center", d3.forceCenter(w/2, h/2))	// 设置布局参考位置居中
@@ -60,6 +60,8 @@ var GD_nodes = [];
 var GD_links = [];
 var GD_uids = [];
 var GD_link_id = [];
+var GD_link_depth = {};
+var GD_node_level = {};
 
 
 G_dispatch.call("main");
