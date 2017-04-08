@@ -25,8 +25,9 @@ G_dispatch.on("main", main);
 
 // 根容器
 var G_svg = d3.select("svg")
+	.attr('oncontextmenu', 'return false;')
 	.call(d3.zoom()
-		.scaleExtent([1/2, 8])	// 缩放比例
+		.scaleExtent([1/1000, 8])	// 缩放比例
 		.on("zoom", zoomed)		// 缩放事件
 	)
 	;
@@ -44,14 +45,15 @@ var G_simulation = d3.forceSimulation()
 	// 	})
 	// 	.iterations(16)
 	// )
-	.force("link", d3.forceLink().distance(50)
+	.force("link", d3.forceLink()
+		.distance(distance)
 		.id( function(d) { return d.id; } )
 		.strength(strength)
 	)
 	// .force("x", d3.forceX())
 	// .force("y", d3.forceY())
-	.force("xPos", d3.forceX(w/2))
-	.force("yPos", d3.forceY(h/2))
+	// .force("xPos", d3.forceX(w/2))
+	// .force("yPos", d3.forceY(h/2))
 	// 设置布局参考位置居中
 	.force("center", d3.forceCenter(w/2, h/2))
 	// .alphaTarget(1)
@@ -70,6 +72,7 @@ var G_node = G_g.select("#node-container").selectAll(".node");
 var GD_nodes = [];
 var GD_links = [];
 var GD_uids = [];
+var GD_link_id = [];
 
 
 G_dispatch.call("main");

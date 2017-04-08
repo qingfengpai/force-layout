@@ -34,3 +34,31 @@
 - chrome 上 click 事件触发会出现问题，重启即可。Firefox正常。
     - svg 绑定zoom事件，node绑定drag、click事件。
     - 类似问题 https://github.com/d3/d3-zoom/issues/62
+
+
+### json 示例
+```json
+{
+    "source": {
+        "id": "872570",
+        "parent": "",
+        "sex": "m",
+        "pro": 31,
+        "v": 1
+    },
+    "target": {
+        "id": "1541505",
+        "parent": "872570",
+        "sex": "m",
+        "pro": 31,
+        "v": 1
+    },
+    "link": {
+        "_lid": "872570_1541505",
+        "wbid": "4059263678303661",
+        "time": "1483287341",
+        "source": "872570",
+        "target": "1541505"
+    }
+}
+```

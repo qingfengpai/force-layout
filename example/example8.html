@@ -5,13 +5,19 @@
 <meta charset="utf-8">
 <style type="text/css">
 .link {
+	animation: show 1s ease;
     stroke: #bbb;
 }
 .node circle{
+	animation: show 1s ease;
 	pointer-events: all;
 	fill: black;
 	stroke-width: 0px;
 	r: 8px
+}
+@keyframes show {
+	from { opacity: 0; }
+	to { opacity: 1; }
 }
 h1 {
 	color: white;
@@ -51,8 +57,8 @@ var node;
 var circles;
 var link;
 var simulation = d3.forceSimulation()
-	.force("charge", d3.forceManyBody().strength(-500))
-	.force("link", d3.forceLink().distance(50)
+	.force("charge", d3.forceManyBody().strength(-200))
+	.force("link", d3.forceLink().distance(20)
 		.id(function(d) { return d.id; }))
 	.force("xPos", d3.forceX(w/2))
 	.force("yPos", d3.forceY(h/2))
@@ -74,6 +80,10 @@ let timer = setInterval(function(){
 	// links.push(newLink);
 	// addLeaf();
 }, 1000);
+
+// let timer1 = setInterval(function(){
+// 	console.log(nodes.length);
+// }, 5000);
 
 setTimeout(function(){
 	clearInterval(timer);
@@ -152,9 +162,6 @@ function addLeaf(rootId,newId){
 
 	var linkEnter = link.enter().append("line")
 						.attr("class","link")
-						.call(function(d){
-							console.log(d._groups[0])
-						})
 						;
 
 	link = linkEnter.merge(link);
