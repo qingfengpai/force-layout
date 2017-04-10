@@ -51,7 +51,7 @@ svg {
 	to { opacity: 1; }
 }
 .show {
-	animation: show 1s ease;
+	/*animation: show 1s ease;*/
 }
 .hide {
 	opacity: 0.2;
@@ -61,7 +61,18 @@ svg {
 }
 .line {
 	animation: show 1s ease;
-	stroke: #333;
+	stroke: #777;
 	stroke-width: 1;
+	marker-end: url(#arrow);
+}
+@keyframes fly {
+	from { stroke-dashoffset: 0;  }
+	to { stroke-dashoffset: 20px; }
+}
+.predict {
+	animation: show 1s linear infinite alternate;
+	stroke: #555;
+	stroke-width: 1;
+	stroke-dasharray: 3;
 	marker-end: url(#arrow);
 }

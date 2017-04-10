@@ -20,13 +20,14 @@
 			<g id="node-container"></g>
 		</g>
 		<!-- 箭头 -->
-		<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#333"></path></marker></defs>
+		<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#777"></path></marker></defs>
 	</svg>
 </div>
 </body>
 <script src="../lib/util.js"></script>
 <script src="../lib/index.js"></script>
 <script>
+var color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
 // 根容器
 var G_svg = d3.select("svg")
@@ -43,12 +44,14 @@ var h = +G_svg.attr("height");
 
 // 创建并配置力导引模拟器
 var G_simulation = d3.forceSimulation()
-	.force("charge", d3.forceManyBody().strength(-200)) // 节点间的作用力
+	.force("charge", d3.forceManyBody().strength(-10)) // 节点间的作用力
 	.force("link", d3.forceLink()
-		.distance(20)
+		.distance(distance)
 		.id( function(d) { return d.id; } )
 	)
+	.force('collide', d3.forceCollide().strength(0.5))
 	.force("center", d3.forceCenter(w/2, h/2))	// 设置布局参考位置居中
+	.alphaTarget(0)
 	.on("tick", ticked)
 	;
 
@@ -57,11 +60,12 @@ var G_simulation = d3.forceSimulation()
 var G_g = G_svg.select("#container");
 var G_links = G_g.select("#line-container").selectAll(".link");
 var G_nodes = G_g.select("#node-container").selectAll(".node");
+var G_cicles = G_g.selectAll("circle");
 
 var GD_data; 			// 后端数据
 var GD_nodes = [];
 var GD_links = [];
-var GD_wbids = []; 		//每个微博是一个节点
+var GD_wbids = []; 		//每个微博是一个节点, 它的索引和GD_nodes像对应
 var GD_link_depth = {};
 var GD_node_level = {};
 var G_timer;			// 全局定时器
@@ -75,22 +79,23 @@ G_dispatch.on('new_node_created', new_node_created);
 var G_scene;
 
 d3.select(".js-operation").on("click", function(){
-	let scene = event.target.id;
+	let scene = d3.event.target.id;
 	if (G_scene == scene) { return; }
 	G_scene = scene;
 	d3.select(this).selectAll("button").attr("class", "");
-	d3.select(event.target).attr("class", "btn-primary");
+	d3.select(d3.event.target).attr("class", "btn-primary");
 	clear_layout();
 	clearInterval(G_timer);
+	let data = JSON.parse(GD_data)
 	switch (G_scene) {
 		case "path":
-			path(GD_data);
+			path(data);
 			break;
 		case "process":
-			process(GD_data);
+			process(data);
 			break;
 		case "predict":
-			predict(GD_data);
+			predict(data);
 			break;
 	}
 
