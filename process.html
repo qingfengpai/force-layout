@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>index</title>
+<meta charset="utf-8">
+<link rel="stylesheet" type="text/css" href="../css/index.css">
+<script src="../lib/d3-v4.7.4.min.js"></script>
+</head>
+<body>
+<svg width="960" height="600">
+	<!-- 图 -->
+	<g id="container">
+		<g id="line-container"></g>
+		<g id="node-container"></g>
+	</g>
+	<!-- 箭头 -->
+	<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#777"></path></marker></defs>
+</svg>
+</body>
+<script src="../lib/util.js"></script>
+<script src="../js/process.js"></script>
+<script>
+var color = d3.scaleOrdinal().range(d3.schemeCategory20);
+
+// 为了使得布局居中
+var w = 1000;
+var h = 800;
+
+// 根容器
+var G_svg = d3.select("svg")
+	.attr("width", w)
+	.attr("height", h)
+	// .attr('oncontextmenu', 'return false;') 	// 禁用右键
+	.call(d3.zoom()
+		.scaleExtent([1/1000, 8])	// 缩放比例
+		.on("zoom", zoomed)		// 缩放事件
+	)
+	;
+
+
+// 创建并配置力导引模拟器
+var G_simulation = d3.forceSimulation()
+	.force("charge", d3.forceManyBody().strength(-10)) // 节点间的作用力
+	.force("link", d3.forceLink()
+		.distance(distance)
+		.id( function(d) { return d.id; } )
+	)
+	.force('collide', d3.forceCollide().strength(0.5))
+	.force("center", d3.forceCenter(w/2, h/2))	// 设置布局参考位置居中
+	.alphaTarget(0)
+	.on("tick", ticked)
+	;
+
+
+// 容器, link存线, node存节点
+var G_g = G_svg.select("#container");
+var G_links = G_g.select("#line-container").selectAll(".link");
+var G_nodes = G_g.select("#node-container").selectAll(".node");
+var G_cicles = G_g.selectAll("circle");
+
+var GD_data; 			// 后端数据
+var GD_nodes = [];
+var GD_links = [];
+var GD_wbids = []; 		//每个微博是一个节点, 它的索引和GD_nodes像对应
+var GD_link_depth = {};
+var GD_node_level = {};
+
+// 事件调度器
+var G_dispatch = d3.dispatch("new_node_created", "response_callbak");
+G_dispatch.on('new_node_created', new_node_created);
+G_dispatch.on('response_callbak', response_callbak);
+
+main()
+
+function response_callbak(){
+	let data = JSON.parse(GD_data);
+	process(data);
+}
+
+
+</script>
+</html>
