@@ -9,9 +9,9 @@
 <body>
 <div class="container">
 	<div class="js-operation">
-		<button id="path">传播路径可视化</button>
-		<button id="process">传播过程可视化</button>
-		<button id="predict">转发预测可视化</button>
+		<a class="btn" id="path">传播路径可视化</a>
+		<a class="btn" id="process">传播过程可视化</a>
+		<a class="btn" id="predict">转发预测可视化</a>
 	</div>
 	<svg width="960" height="600">
 		<!-- 图 -->
@@ -82,8 +82,11 @@ d3.select(".js-operation").on("click", function(){
 	let scene = d3.event.target.id;
 	if (G_scene == scene) { return; }
 	G_scene = scene;
-	d3.select(this).selectAll("button").attr("class", "");
-	d3.select(d3.event.target).attr("class", "btn-primary");
+	let btns = document.querySelectorAll(".btn");
+	for (var i = 0; i < btns.length; i++) {
+		btns[i].classList.remove("btn-primary");
+	}
+	d3.event.target.classList.add("btn-primary");
 	clear_layout();
 	clearInterval(G_timer);
 	let data = JSON.parse(GD_data)
