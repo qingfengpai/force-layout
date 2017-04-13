@@ -68,7 +68,9 @@ function hilight_path(nids){
 		if (k > -1) {
 			item.color = "hilight";
 			nids.splice(k, 1);
-			if (nids.length == 0) { break; }
+			// if (nids.length == 0) { break; }
+		} else {
+			item.color = "nolight";
 		}
 	}
 
@@ -85,7 +87,9 @@ function hilight_path(nids){
 		if (k > -1) {
 			item.color = "hilight";
 			hlinks.splice(k, 1);
-			if (hlinks.length == 0) { break; }
+			// if (hlinks.length == 0) { break; }
+		} else {
+			item.color = "nolight";
 		}
 	}
 	redraw();
@@ -96,10 +100,10 @@ function hilight_path(nids){
  */
 function clear_hilight(){
 	GD_data.nodes.forEach(function(item, index){
-		item.color = "";
+		item.color = "common";
 	});
 	GD_data.links.forEach(function(item, index){
-		item.color = "";
+		item.color = "common";
 	});
 	redraw();
 }
@@ -129,8 +133,6 @@ function redraw() {
 	var nodes = GD_data.nodes,
 	  	links = GD_data.links;
 
-	meter.style.display = "none";
-
 	context.save();
 	context.clearRect(0, 0, width, height);
 	context.translate(transform.x, transform.y);
@@ -149,12 +151,7 @@ function drawLink(l) {
 	context.beginPath();
 	context.moveTo(l.source.x, l.source.y);
 	context.lineTo(l.target.x, l.target.y);
-	if (l.color == "hilight") {
-		console.log(l)
-		context.strokeStyle = "#e6550d";
-	} else {
-		context.strokeStyle = "#aaa";
-	}
+	change_color(context, l);
 	context.stroke();
 }
 
@@ -164,12 +161,30 @@ function drawLink(l) {
 function drawNode(d) {
 	context.beginPath();
 	context.moveTo(d.x + 3, d.y);
-	context.arc(d.x, d.y, 3, 0, radius*Math.PI);
-	if (d.color == "hilight") {
-		context.fillStyle = "#e6550d";
-	} else {
-		context.fillStyle = "#333";
-	}
+	context.lineWidth = 1;
+	context.arc(d.x, d.y, 3, 0, (radius+1+1)*Math.PI);
+	change_color(context, d);
 	context.fill();
 	context.stroke();
+}
+
+function change_color(context, d){
+	var color;
+	var apacity = 1;
+	if (!d.ancestor) {		// link
+		color = "#999";
+	} else {
+		color = G_color(d.depth);
+	}
+	switch (d.color) {
+		case "hilight":
+			color = "#e6550d";
+			break;
+		case "nolight":
+			apacity = 0.2;
+			break;
+	}
+	context.fillStyle = color;
+	context.strokeStyle = color;
+	context.globalAlpha = apacity;
 }

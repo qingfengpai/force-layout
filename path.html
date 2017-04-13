@@ -47,6 +47,7 @@ var radius = 2;
 var transform = d3.zoomIdentity;
 var GD_data = {};	// 全局数据
 var G_curr_node; 	// 鼠标当前所在node
+var G_color = d3.scaleOrdinal().range(d3.schemeCategory20);
 var context = d3.select("body").append("canvas")
 	.attr("id", "canvas")
 	.attr("width", width)
@@ -64,9 +65,9 @@ var G_simulation = d3.forceSimulation()
 	.force("center", d3.forceCenter(width/2, height/2))
 	;
 // 获取数据
-d3.request("../data/path-link-b76cde.json")			// biger
+// d3.request("../data/path-link-b76cde.json")			// biger
 // d3.request("../data/path-link-abe47d.json")		// middle
-// d3.request("../data/path-link-85f0c2.json")		// little
+d3.request("../data/path-link-85f0c2.json")		// little
 	.mimeType("application/json")
 	.response(function(xhr) {
 		var links = JSON.parse(xhr.responseText);
@@ -97,8 +98,10 @@ function main(){
 	var worker = new Worker("../js/path-tick.js");
 
 	worker.postMessage({
-	  nodes: nodes,
-	  links: links
+		width: width,
+		height: height,
+		nodes: nodes,
+		links: links
 	});
 
 	worker.onmessage = function(event) {
@@ -109,11 +112,17 @@ function main(){
 	};
 }
 
+/**
+ * 进度条
+ */
 function ticked(data) {
   var progress = data.progress;
   meter.style.width = 100 * progress + "%";
 }
 
+/**
+ * 布局计算完成
+ */
 function ended(data) {
 	meter.style.display = "none";
 	GD_data['nodes'] = data.nodes;
@@ -122,13 +131,6 @@ function ended(data) {
 	G_simulation.force("link").links(data.links);
 	G_simulation.stop();
 	redraw();
-}
-
-/**
- * 进度条
- */
-function progress(percent) {
-	meter.style.width = 100 * percent + "%";
 }
 
 </script>
