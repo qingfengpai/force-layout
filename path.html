@@ -31,109 +31,116 @@
 	right: -80px;
 	clip: rect(-6px, 90px, 14px, -6px);
 }
-
 </style>
 <link rel="stylesheet" type="text/css" href="../css/index.css">
-<script src="../lib/d3-v4.7.4.min.js"></script>
 <script src="../lib/d3-v4.7.4.min.js"></script>
 </head>
 <body>
 <div id="progress"></div>
 </body>
+<script src="../js/path.js"></script>
 <script type="text/javascript">
 var meter = document.querySelector("#progress");
-
-var width = 960,
-	height = 600;
+var width = 960;
+var height = 600;
+var searchRadius = 5;
+var transform = d3.zoomIdentity;
+var GD_data = {};	// 全局数据
+var G_curr_node; 	// 鼠标当前所在node
 var context = d3.select("body").append("canvas")
 	.attr("id", "canvas")
 	.attr("width", width)
 	.attr("height", height)
 	.call(d3.zoom().scaleExtent([1, 8]).on("zoom", zoom))
-	.on("mousemove", function(d) {
-		var p = d3.mouse(this);
-		// var node = simulation.find(p[0], p[1]);
-		console.log(p);
-	})
-	.node().getContext("2d");
-
-function over(){
-	console.log(d3.event);
-
-}
-
-var worker = new Worker("js/path.js");
-
-worker.onmessage = function(event) {
-	switch (event.data.type) {
-		case "tick": return ticked(event.data);
-		case "end": return end(event.data);
-	}
-};
-
-var GD_data;
-
+	.on("mousemove", mousemoved)
+	.node().getContext("2d")
+	;
+var G_simulation = d3.forceSimulation()
+	.force("charge", d3.forceManyBody())
+	.force("link", d3.forceLink().distance(20).strength(1)
+		.id(function(d, i){ return d.id; }))
+	.force("x", d3.forceX())
+	.force("y", d3.forceY())
+	.force("center", d3.forceCenter(width/2, height/2))
+	;
+// 获取数据
 d3.request("../data/path-link-85f0c2.json")
 	.mimeType("application/json")
 	.response(function(xhr) {
-		GD_data = JSON.parse(xhr.responseText);
-		worker.postMessage(GD_data);
+		var links = JSON.parse(xhr.responseText);
+		var nodes = test(xhr.responseText);
+		var n = links.length;
+		var null_index;
+		for (var i = 0; i < n; i++) {
+			var item = links[i];
+			if (item['source'] == "") {
+				null_index = i;
+				continue;
+			}
+			item['id'] = item.source + "-" + item.target;
+		}
+		links.splice(null_index, 1)		// 删除root和null的连接
+		GD_data['nodes'] = nodes;
+		GD_data['links'] = links;
+		main();
 	})
 	.get()
 ;
 
-function zoom() {
-	context.save();
-	context.clearRect(0, 0, width, height);
-	context.translate(d3.event.transform.x, d3.event.transform.y);
-	context.scale(d3.event.transform.k, d3.event.transform.k);
-	draw();
-	context.restore();
+/**
+ * 一个微博只可能转自另一条微博, 他们是一对一的关系
+ */
+function test(response){
+	var nodes = [];
+	var ids_dict = {};
+	var data = JSON.parse(response);
+	var n = data.length;
+	for (var i = 0; i < n; i++) {
+		var item = data[i];
+		var id = item.target;
+		var prev = item.source;
+		var index;
+		var node = {};
+		var pnode;			//父节点
+		if (ids_dict[id]) {
+			continue;
+		}
+		node["id"] = id
+		if (prev == "") { 	// 是根节点
+			node["ancestor"] = "null";
+			node["depth"] = 0;
+		} else {			// 不是根节点
+			var pindex = ids_dict[prev];
+			pnode = nodes[pindex];
+			node["ancestor"] = pnode["ancestor"] + "," + pnode["id"];
+			node["depth"] = pnode["depth"] + 1;
+		}
+		index = nodes.push(node)
+		ids_dict[id] = index - 1;
+	}
+	return nodes;
 }
 
-
-function ticked(data) {
-	var progress = data.progress;
-	meter.style.width = 100 * progress + "%";
-}
-
-function end(data) {
-	GD_data = data;
-	draw(GD_data);
-}
-
-function draw() {
+// 入口函数
+function main(){
 	var nodes = GD_data.nodes,
-	  	links = GD_data.links;
+		links = GD_data.links;
 
-	meter.style.display = "none";
+	G_simulation.nodes(nodes);
+	G_simulation.force("link").links(links);
+	G_simulation.stop();
 
-	context.clearRect(0, 0, width, height);
-	context.save();
-	context.translate(width / 2, height / 2);
+	var min = G_simulation.alphaMin();		// 获取最小的 alpha 值
+	var decay = G_simulation.alphaDecay(); 	// 获取衰减系数
+	var n = Math.ceil(Math.log(min) / Math.log(1 - decay));
 
-	context.beginPath();
-	links.forEach(drawLink);
-	context.strokeStyle = "#aaa";
-	context.stroke();
+	for (var i = 0; i < n; ++i) {
+		G_simulation.tick();
+		progress(i/n)
+	}
 
-	context.beginPath();
-	nodes.forEach(drawNode);
-	context.fill();
-	context.strokeStyle = "#fff";
-	context.stroke();
-
-	context.restore();
+	redraw();		// 画图
 }
 
-function drawLink(d) {
-	context.moveTo(d.source.x, d.source.y);
-	context.lineTo(d.target.x, d.target.y);
-}
-
-function drawNode(d) {
-	context.moveTo(d.x + 3, d.y);
-	context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
-}
 </script>
 </html>

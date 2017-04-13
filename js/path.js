@@ -1,27 +1,142 @@
-importScripts("../lib/d3-v4.7.4.min.js");
 
-onmessage = function(event) {
-	var nodes = event.data.nodes,
-		links = event.data.links;
+/**
+ * 鼠标离开node, G_curr_node 为空
+ * 鼠标在一个node范围内活动，忽略
+ */
+function mousemoved() {
+	var m = d3.mouse(this);
+	var node = get_focus_node(m);
+	if (!node) {			// 不在node上
+		if (G_curr_node) {	// 刚才在node上
+			G_curr_node = null;
+			clear_hilight();
+		}
+		return;
+	}
+	if (!G_curr_node) { G_curr_node = node; }
+	else if (G_curr_node.id === node.id) { return; }
+	G_curr_node = node;
+	console.log("mouseover: ", node);
+	var nids = node.ancestor.split(",")
+	nids.shift(); 			// 删除第一个元素 null, 没有意义
+	nids.push(node.id);		// 把自身添加进去
+	console.log("mouseover: ", nids);
+	hilight_path(nids);
+}
 
-	var simulation = d3.forceSimulation(nodes)
-		.force("charge", d3.forceManyBody())
-		.force("link", d3.forceLink(links).distance(20).strength(1).id(function(d, i){
-			return d.id;
-		}))
-		.force("x", d3.forceX())
-		.force("y", d3.forceY())
-		// .force("center", d3.forceCenter(width / 2, height / 2))
-		.stop();
-
-	let min = simulation.alphaMin();	// 获取最小的 alpha 值
-	let decay = simulation.alphaDecay(); 	// 获取衰减系数
-	let n = Math.ceil(Math.log(min) / Math.log(1 - decay));
-
-	for (var i = 0; i < n; ++i) {
-		postMessage({type: "tick", progress: i / n});
-		simulation.tick();
+/**
+ * 高亮祖先节点和路径
+ * 高亮一个节点，就把它从nids中取出，当nids的长度为0时，结束遍历
+ */
+function hilight_path(nids){
+	var lines = JSON.parse(JSON.stringify(nids));
+	for (var i = 0, n = GD_data.nodes.length; i < n; i++) {
+		var item = GD_data.nodes[i];
+		var k = nids.indexOf(item.id);
+		if (k > -1) {
+			item.color = "hilight";
+			nids.splice(k, 1);
+			if (nids.length == 0) { break; }
+		}
 	}
 
-	postMessage({type: "end", nodes: nodes, links: links});
-};
+	var hlinks = [];		// 高亮的links
+	var length = lines.length - 1;
+	lines.forEach(function(item, index) {
+		if (index == length) { return; }
+		hlinks.push( item + "-" + lines[index + 1] );
+	});
+
+	for (var i = 0, n = GD_data.links.length; i < n; i++) {
+		var item = GD_data.links[i];
+		var k = hlinks.indexOf(item.id);
+		if (k > -1) {
+			item.color = "hilight";
+			hlinks.splice(k, 1);
+			if (hlinks.length == 0) { break; }
+		}
+	}
+	redraw();
+}
+
+/**
+ * 清除全部高亮
+ */
+function clear_hilight(){
+	GD_data.nodes.forEach(function(item, index){
+		item.color = "";
+	});
+	GD_data.links.forEach(function(item, index){
+		item.color = "";
+	});
+	redraw();
+}
+
+/**
+ * 获得当前鼠标所在的node
+ */
+function get_focus_node(m) {
+	var x = transform.invertX(m[0]);
+	var y = transform.invertY(m[1]);
+	var node = G_simulation.find(x, y, searchRadius);
+	return node;
+}
+
+/**
+ * 缩放
+ */
+function zoom() {
+	transform = d3.event.transform;
+	redraw();
+}
+
+/**
+ * 进度条
+ */
+function progress(percent) {
+	meter.style.width = 100 * percent + "%";
+}
+
+function redraw() {
+	var nodes = GD_data.nodes,
+	  	links = GD_data.links;
+
+	meter.style.display = "none";
+
+	context.save();
+	context.clearRect(0, 0, width, height);
+	context.translate(transform.x, transform.y);
+	context.scale(transform.k, transform.k);
+
+	links.forEach(drawLink);
+	nodes.forEach(drawNode);
+
+	context.restore();
+}
+
+function drawLink(l) {
+	context.beginPath();
+	context.moveTo(l.source.x, l.source.y);
+	context.lineTo(l.target.x, l.target.y);
+	if (l.color == "hilight") {
+		console.log(l)
+		context.strokeStyle = "#e6550d";
+	} else {
+		context.strokeStyle = "#aaa";
+	}
+	context.stroke();
+}
+
+function drawNode(d) {
+	context.beginPath();
+	context.moveTo(d.x + 3, d.y);
+	context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
+	if (d.color == "hilight") {
+		// console.log("drawNode: ", d);
+		context.fillStyle = "#e6550d";
+	} else {
+		context.fillStyle = "#333";
+	}
+	context.fill();
+	context.stroke();
+}
