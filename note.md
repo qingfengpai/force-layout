@@ -31,3 +31,17 @@
 
 - 推荐node数：http://bl.ocks.org/mjromper/95fef29a83c43cb116c3
 - https://github.com/curran/HTML5Examples/tree/gh-pages/d3/scaleTest
+
+
+### 注意
+
+-  since you're defining the source and the target by the id of the node, not by its numeric index, you have to specify this id in the id() function:
+```js
+.force("link", d3.forceLink(links)
+     .id(function(d,i) {
+         return d.id
+     })
+    .distance(20)
+    .strength(1)
+)
+```
