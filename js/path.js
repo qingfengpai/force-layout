@@ -1,5 +1,37 @@
 
 /**
+ * 一个微博只可能转自另一条微博, 他们是一对一的关系
+ */
+function extract_nodes(response){
+	var nodes = [];
+	var ids_dict = {};
+	var data = JSON.parse(response);
+	var n = data.length;
+	for (var i = 0; i < n; i++) {
+		var item = data[i];
+		var id = item.target;
+		var prev = item.source;
+		var index;
+		var node = {};
+		var pnode;			//父节点
+		if (ids_dict[id]) {	continue; }
+		node["id"] = id
+		if (prev == "null") { 	// 是根节点
+			node["ancestor"] = "null";
+			node["depth"] = 0;
+		} else {			// 不是根节点
+			var pindex = ids_dict[prev];
+			pnode = nodes[pindex];
+			node["ancestor"] = pnode["ancestor"] + "," + pnode["id"];
+			node["depth"] = pnode["depth"] + 1;
+		}
+		index = nodes.push(node)
+		ids_dict[id] = index - 1;
+	}
+	return nodes;
+}
+
+/**
  * 鼠标离开node, G_curr_node 为空
  * 鼠标在一个node范围内活动，忽略
  */
@@ -78,7 +110,7 @@ function clear_hilight(){
 function get_focus_node(m) {
 	var x = transform.invertX(m[0]);
 	var y = transform.invertY(m[1]);
-	var node = G_simulation.find(x, y, searchRadius);
+	var node = G_simulation.find(x, y, radius);
 	return node;
 }
 
@@ -91,12 +123,8 @@ function zoom() {
 }
 
 /**
- * 进度条
+ * 重新绘图
  */
-function progress(percent) {
-	meter.style.width = 100 * percent + "%";
-}
-
 function redraw() {
 	var nodes = GD_data.nodes,
 	  	links = GD_data.links;
@@ -114,6 +142,9 @@ function redraw() {
 	context.restore();
 }
 
+/**
+ * 画线
+ */
 function drawLink(l) {
 	context.beginPath();
 	context.moveTo(l.source.x, l.source.y);
@@ -127,12 +158,14 @@ function drawLink(l) {
 	context.stroke();
 }
 
+/**
+ * 画点
+ */
 function drawNode(d) {
 	context.beginPath();
 	context.moveTo(d.x + 3, d.y);
-	context.arc(d.x, d.y, 3, 0, 2 * Math.PI);
+	context.arc(d.x, d.y, 3, 0, radius*Math.PI);
 	if (d.color == "hilight") {
-		// console.log("drawNode: ", d);
 		context.fillStyle = "#e6550d";
 	} else {
 		context.fillStyle = "#333";

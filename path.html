@@ -43,7 +43,7 @@
 var meter = document.querySelector("#progress");
 var width = 960;
 var height = 600;
-var searchRadius = 5;
+var radius = 2;
 var transform = d3.zoomIdentity;
 var GD_data = {};	// 全局数据
 var G_curr_node; 	// 鼠标当前所在node
@@ -64,11 +64,13 @@ var G_simulation = d3.forceSimulation()
 	.force("center", d3.forceCenter(width/2, height/2))
 	;
 // 获取数据
-d3.request("../data/path-link-85f0c2.json")
+d3.request("../data/path-link-b76cde.json")			// biger
+// d3.request("../data/path-link-abe47d.json")		// middle
+// d3.request("../data/path-link-85f0c2.json")		// little
 	.mimeType("application/json")
 	.response(function(xhr) {
 		var links = JSON.parse(xhr.responseText);
-		var nodes = test(xhr.responseText);
+		var nodes = extract_nodes(xhr.responseText);
 		var n = links.length;
 		var null_index;
 		for (var i = 0; i < n; i++) {
@@ -87,59 +89,46 @@ d3.request("../data/path-link-85f0c2.json")
 	.get()
 ;
 
-/**
- * 一个微博只可能转自另一条微博, 他们是一对一的关系
- */
-function test(response){
-	var nodes = [];
-	var ids_dict = {};
-	var data = JSON.parse(response);
-	var n = data.length;
-	for (var i = 0; i < n; i++) {
-		var item = data[i];
-		var id = item.target;
-		var prev = item.source;
-		var index;
-		var node = {};
-		var pnode;			//父节点
-		if (ids_dict[id]) {
-			continue;
-		}
-		node["id"] = id
-		if (prev == "") { 	// 是根节点
-			node["ancestor"] = "null";
-			node["depth"] = 0;
-		} else {			// 不是根节点
-			var pindex = ids_dict[prev];
-			pnode = nodes[pindex];
-			node["ancestor"] = pnode["ancestor"] + "," + pnode["id"];
-			node["depth"] = pnode["depth"] + 1;
-		}
-		index = nodes.push(node)
-		ids_dict[id] = index - 1;
-	}
-	return nodes;
-}
-
 // 入口函数
 function main(){
 	var nodes = GD_data.nodes,
 		links = GD_data.links;
 
-	G_simulation.nodes(nodes);
-	G_simulation.force("link").links(links);
+	var worker = new Worker("../js/path-tick.js");
+
+	worker.postMessage({
+	  nodes: nodes,
+	  links: links
+	});
+
+	worker.onmessage = function(event) {
+		switch (event.data.type) {
+			case "tick": return ticked(event.data);
+			case "end": return ended(event.data);
+		}
+	};
+}
+
+function ticked(data) {
+  var progress = data.progress;
+  meter.style.width = 100 * progress + "%";
+}
+
+function ended(data) {
+	meter.style.display = "none";
+	GD_data['nodes'] = data.nodes;
+	GD_data['links'] = data.links;
+	G_simulation.nodes(data.nodes);
+	G_simulation.force("link").links(data.links);
 	G_simulation.stop();
+	redraw();
+}
 
-	var min = G_simulation.alphaMin();		// 获取最小的 alpha 值
-	var decay = G_simulation.alphaDecay(); 	// 获取衰减系数
-	var n = Math.ceil(Math.log(min) / Math.log(1 - decay));
-
-	for (var i = 0; i < n; ++i) {
-		G_simulation.tick();
-		progress(i/n)
-	}
-
-	redraw();		// 画图
+/**
+ * 进度条
+ */
+function progress(percent) {
+	meter.style.width = 100 * percent + "%";
 }
 
 </script>
