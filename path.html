@@ -52,7 +52,7 @@ var context = d3.select("body").append("canvas")
 	.attr("id", "canvas")
 	.attr("width", width)
 	.attr("height", height)
-	.call(d3.zoom().scaleExtent([1, 8]).on("zoom", zoom))
+	.call(d3.zoom().scaleExtent([1/10000, 8]).on("zoom", zoom))
 	.on("mousemove", mousemoved)
 	.node().getContext("2d")
 	;
@@ -65,9 +65,9 @@ var G_simulation = d3.forceSimulation()
 	.force("center", d3.forceCenter(width/2, height/2))
 	;
 // 获取数据
-// d3.request("../data/path-link-b76cde.json")			// biger
+d3.request("../data/path-link-b76cde.json")			// biger
 // d3.request("../data/path-link-abe47d.json")		// middle
-d3.request("../data/path-link-85f0c2.json")		// little
+// d3.request("../data/path-link-85f0c2.json")		// little
 	.mimeType("application/json")
 	.response(function(xhr) {
 		var links = JSON.parse(xhr.responseText);

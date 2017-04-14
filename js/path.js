@@ -16,7 +16,7 @@ function extract_nodes(response){
 		var pnode;			//父节点
 		if (ids_dict[id]) {	continue; }
 		node["id"] = id
-		if (prev == "null") { 	// 是根节点
+		if (prev == "" || prev == "null") { 	// 是根节点
 			node["ancestor"] = "null";
 			node["depth"] = 0;
 		} else {			// 不是根节点
