@@ -4,7 +4,8 @@
  * 入口函数, 请求数据
  */
 function main() {
-	d3.request("../data/link-85f0c2.json")
+	// d3.request("../data/link-85f0c2.json")
+	d3.request("../data/link-230127.json")
 		.mimeType("application/json")
 		.response(function(xhr) {
 			GD_data = xhr.responseText;
@@ -20,19 +21,28 @@ function main() {
 function process(data) {
 	let per = 1000;
 	let count = data.length;
-	// let count = 4;
 	let index = 0;
 	G_timer = setInterval(function(){
-		let s = data[index]['source'];
-		if (GD_wbids.indexOf(s.id) == -1) {
-			add_node(s);
+		let count = Math.ceil(Math.random() * 10);
+		console.log(count);
+		while (count > 0) {
+			try {
+				let s = data[index]['source'];
+				if (GD_wbids.indexOf(s.id) == -1) {
+					add_node(s);
+				}
+				let t = data[index]['target'];
+				if (GD_wbids.indexOf(t.id) == -1) {
+					add_node(t);
+				}
+				add_link(data[index]['link']);
+			} catch (e) {
+				break;
+			} finally {
+				index++;
+				count--;
+			}
 		}
-		let t = data[index]['target'];
-		if (GD_wbids.indexOf(t.id) == -1) {
-			add_node(t);
-		}
-		add_link(data[index]['link']);
-		index++;
 		restart();
 	}, per);
 

@@ -13,15 +13,19 @@
 		<a class="btn" id="process">传播过程可视化</a>
 		<a class="btn" id="predict">转发预测可视化</a>
 	</div>
-	<svg width="960" height="600">
+	<svg id="retweet" width="750" height="500">
 		<!-- 图 -->
 		<g id="container">
 			<g id="line-container"></g>
 			<g id="node-container"></g>
 		</g>
 		<!-- 箭头 -->
-		<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#777"></path></marker></defs>
+		<!-- <defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#777"></path></marker></defs> -->
 	</svg>
+	<svg id="map" width="400" height="400"></svg>
+	<!-- <div>
+		<svg id="line-chart-item"></svg>
+	</div> -->
 </div>
 </body>
 <script src="../lib/util.js"></script>
@@ -30,7 +34,7 @@
 var color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
 // 根容器
-var G_svg = d3.select("svg")
+var G_svg = d3.select("#retweet")
 	.attr('oncontextmenu', 'return false;')
 	.call(d3.zoom()
 		.scaleExtent([1/1000, 8])	// 缩放比例
@@ -61,6 +65,9 @@ var G_g = G_svg.select("#container");
 var G_links = G_g.select("#line-container").selectAll(".link");
 var G_nodes = G_g.select("#node-container").selectAll(".node");
 var G_cicles = G_g.selectAll("circle");
+var G_line_chart;
+var G_map_path = d3.select("#map").selectAll("path");
+
 
 var GD_data; 			// 后端数据
 var GD_nodes = [];
@@ -69,6 +76,10 @@ var GD_wbids = []; 		//每个微博是一个节点, 它的索引和GD_nodes像�
 var GD_link_depth = {};
 var GD_node_level = {};
 var G_timer;			// 全局定时器
+var GD_prov = {"total": 0};		// 地图深度数据
+var GD_time_data = {
+	"days": []
+};
 
 // 事件调度器
 var G_dispatch = d3.dispatch("new_node_created");
@@ -104,6 +115,7 @@ d3.select(".js-operation").on("click", function(){
 
 });
 
+initialize()
 main()
 
 </script>
