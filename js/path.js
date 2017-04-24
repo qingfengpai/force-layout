@@ -129,7 +129,7 @@ function zoom() {
 /**
  * 重新绘图
  */
-function redraw() {
+function redraw(nodes, links) {
 	var nodes = GD_data.nodes,
 	  	links = GD_data.links;
 

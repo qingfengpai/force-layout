@@ -72,8 +72,8 @@ var G_simulation = d3.forceSimulation()
 	.force("center", d3.forceCenter(width/2, height/2))
 	;
 // 获取数据
-d3.request("../data/path-link-b76cde.json")			// biger
-// d3.request("../data/path-link-abe47d.json")		// middle
+// d3.request("../data/path-link-b76cde.json")			// biger
+d3.request("../data/path-link-abe47d.json")		// middle
 // d3.request("../data/path-link-85f0c2.json")		// little
 	.mimeType("application/json")
 	.response(function(xhr) {
@@ -92,15 +92,15 @@ d3.request("../data/path-link-b76cde.json")			// biger
 		links.splice(null_index, 1)		// 删除root和null的连接
 		GD_data['nodes'] = nodes;
 		GD_data['links'] = links;
-		main();
+		main(nodes, links);
 	})
 	.get()
 ;
 
 // 入口函数
-function main(){
-	var nodes = GD_data.nodes,
-		links = GD_data.links;
+function main(nodes, links){
+	// var nodes = GD_data.nodes,
+	// 	links = GD_data.links;
 
 	var worker = new Worker("../js/path-tick.js");
 
@@ -137,7 +137,7 @@ function ended(data) {
 	G_simulation.nodes(data.nodes);
 	G_simulation.force("link").links(data.links);
 	G_simulation.stop();
-	redraw();
+	redraw(data.nodes, data.links);
 }
 
 </script>

@@ -4,8 +4,8 @@ var G_simulation = d3.forceSimulation()
 	.force("charge", d3.forceManyBody())
 	.force("link", d3.forceLink().distance(20).strength(1)
 		.id(function(d, i){ return d.id; }))
-	.force("x", d3.forceX())
-	.force("y", d3.forceY())
+	// .force("x", d3.forceX())
+	// .force("y", d3.forceY())
 	;
 
 onmessage = function(event) {
