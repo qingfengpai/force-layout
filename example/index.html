@@ -8,24 +8,50 @@
 </head>
 <body>
 <div class="container">
-	<div class="js-operation">
-		<a class="btn" id="path">传播路径可视化</a>
-		<a class="btn" id="process">传播过程可视化</a>
-		<a class="btn" id="predict">转发预测可视化</a>
+	<div class="col-2">
+		<div class="block">
+			最新的转发时间<h2 id="time-clock" class="info-line">2017-4-25 14:19:35</p>
+		</div>
+		<div class="block">
+			传播时间：<h2 id="use-time" class="info-line">0:0:0</p>
+		</div>
+		<div class="block">
+			微博数: <h1 id="node-num" class="info-line">0</p>
+		</div>
+		<div class="block">
+			参与人数: <h1 id="user-num" class="info-line">0</p>
+		</div>
+		<div class="block">
+			<div>
+				<p><label>节点: </label> <span id="uid" class="info-line"></span></p>
+				<p><label>性别：</label> <span id="usex" class="info-line"></span></p>
+				<p><label>省份：</label> <span id="upro" class="info-line"></span></p>
+				<p><label>是否大v：</label> <span id="uv" class="info-line"></span></p>
+				<p><label>节点层次：</label> <span id="udepth" class="info-line"></span></p>
+			</div>
+		</div>
 	</div>
-	<svg id="retweet" width="750" height="500">
-		<!-- 图 -->
-		<g id="container">
-			<g id="line-container"></g>
-			<g id="node-container"></g>
-		</g>
-		<!-- 箭头 -->
-		<!-- <defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#777"></path></marker></defs> -->
-	</svg>
-	<svg id="map" width="400" height="400"></svg>
-	<!-- <div>
-		<svg id="line-chart-item"></svg>
-	</div> -->
+	<div class="col-7">
+		<div class="operation">
+			<input type="search" id="search" class="col-6 search" placeholder="搜索用户ID" data-status="false">
+			<button id="predict" class="btn predict-btn">预测当前节点</button>
+		</div>
+		<svg id="retweet" width="780" height="600">
+			<!-- 图 -->
+			<g id="container">
+				<g id="line-container"></g>
+				<g id="node-container"></g>
+			</g>
+			<!-- 箭头 -->
+			<!-- <defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#777"></path></marker></defs> -->
+		</svg>
+	</div>
+	<div class="col-3">
+		<svg id="map" width="320" height=650></svg>
+	</div>
+</div>
+<div class="footer">
+	<div id="stop" class="start" data-status="stop"></div>
 </div>
 </body>
 <script src="../lib/util.js"></script>
@@ -35,7 +61,7 @@ var color = d3.scaleOrdinal().range(d3.schemeCategory20);
 
 // 根容器
 var G_svg = d3.select("#retweet")
-	.attr('oncontextmenu', 'return false;')
+	// .attr('oncontextmenu', 'return false;')
 	.call(d3.zoom()
 		.scaleExtent([1/1000, 8])	// 缩放比例
 		.on("zoom", zoomed)		// 缩放事件
@@ -48,9 +74,9 @@ var h = +G_svg.attr("height");
 
 // 创建并配置力导引模拟器
 var G_simulation = d3.forceSimulation()
-	.force("charge", d3.forceManyBody().strength(-1)) // 节点间的作用力
+	.force("charge", d3.forceManyBody().strength(-5)) // 节点间的作用力
 	.force("link", d3.forceLink()
-		// .distance(distance)
+		.distance(distance)
 		.id( function(d) { return d.id; } )
 	)
 	// .force('collide', d3.forceCollide().strength(0.5))
@@ -73,9 +99,9 @@ var GD_data; 			// 后端数据
 var GD_nodes = [];
 var GD_links = [];
 var GD_wbids = []; 		//每个微博是一个节点, 它的索引和GD_nodes像对应
+var GD_users = [];
 var GD_link_depth = {};
 var GD_node_level = {};
-var G_timer;			// 全局定时器
 var GD_prov = {"total": 0};		// 地图深度数据
 var GD_time_data = {
 	"days": []
@@ -85,39 +111,19 @@ var GD_time_data = {
 var G_dispatch = d3.dispatch("new_node_created");
 G_dispatch.on('new_node_created', new_node_created);
 
-
-// 不同场景下对节点绑定不同事件
-var G_scene;
-
-d3.select(".js-operation").on("click", function(){
-	let scene = d3.event.target.id;
-	if (G_scene == scene) { return; }
-	G_scene = scene;
-	let btns = document.querySelectorAll(".btn");
-	for (var i = 0; i < btns.length; i++) {
-		btns[i].classList.remove("btn-primary");
-	}
-	d3.event.target.classList.add("btn-primary");
-	clear_layout();
-	clearInterval(G_timer);
-	let data = JSON.parse(GD_data)
-	switch (G_scene) {
-		case "path":
-			path(data);
-			break;
-		case "process":
-			console.log(data.length);
-			process(data);
-			break;
-		case "predict":
-			predict(data);
-			break;
-	}
-
-});
+var G_time = {
+	'clock': 0,		// 时钟
+	'begin': 0,		// 布局开始时间
+	'end': 0,
+	'total': 0,
+	'unit': 1000,	// 多久循环一次
+	'index': 0
+}
+var G_curr = {
+	'node': 0
+};
 
 initialize()
-main()
 
 </script>
 </html>
