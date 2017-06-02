@@ -10,25 +10,44 @@
 <div class="container">
 	<div class="col-2">
 		<div class="block">
-			最新的转发时间<h2 id="time-clock" class="info-line">2017-4-25 14:19:35</p>
+			<h3 class="block-title">最新转发时间</h3>
+			<span id="time-clock" class="info-line">2017-4-25 14:19:35</span>
 		</div>
 		<div class="block">
-			传播时间：<h2 id="use-time" class="info-line">0:0:0</p>
+			<h3 class="block-title">传播时间</h3>
+			<span id="use-time" class="info-line">0:0:0</span>
 		</div>
 		<div class="block">
-			微博数: <h1 id="node-num" class="info-line">0</p>
+			<h3 class="block-title">微博总数</h3>
+			<span id="node-num" class="info-line">0</span>
 		</div>
 		<div class="block">
-			参与人数: <h1 id="user-num" class="info-line">0</p>
+			<h3 class="block-title">参与人数</h3>
+			<span id="user-num" class="info-line">0</span>
 		</div>
 		<div class="block">
-			<div>
-				<p><label>节点: </label> <span id="uid" class="info-line"></span></p>
-				<p><label>性别：</label> <span id="usex" class="info-line"></span></p>
-				<p><label>省份：</label> <span id="upro" class="info-line"></span></p>
-				<p><label>是否大v：</label> <span id="uv" class="info-line"></span></p>
-				<p><label>节点层次：</label> <span id="udepth" class="info-line"></span></p>
-			</div>
+			<h3 class="block-title">节点信息</h3>
+			<p>
+				<label>节点：</label>
+				<span id="uid" class="info-span"></span>
+			</p>
+			<p>
+				<label>性别：</label>
+				<span id="usex" class="info-span"></span>
+			</p>
+			<p>
+				<label>省份：</label>
+				<span id="upro" class="info-span"></span>
+			</p>
+			<p>
+				<label>大 v：</label>
+				<span id="uv" class="info-span"></span>
+			</p>
+			<p>
+				<label>层级：</label>
+				<span id="udepth" class="info-span"></span>
+			</p>
+			<img src="" id="avatar">
 		</div>
 	</div>
 	<div class="col-7">
@@ -47,7 +66,7 @@
 		</svg>
 	</div>
 	<div class="col-3">
-		<svg id="map" width="320" height=650></svg>
+		<svg id="map" width="320" height="200"></svg>
 	</div>
 </div>
 <div class="footer">
@@ -124,6 +143,17 @@ var G_curr = {
 };
 
 initialize()
+
+
+GDObject = {};
+G_g.select('#node-container').on('mouseover', function(){
+	var d = GDObject[event.target.id];
+	update_curr_node_info(d);
+	hilight_spread_path(d);
+});
+G_g.select('#node-container').on('mouseleave', function(){
+	clear_hilight();
+});
 
 </script>
 </html>
