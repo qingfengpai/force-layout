@@ -100,7 +100,7 @@ var G_simulation = d3.forceSimulation()
 	)
 	// .force('collide', d3.forceCollide().strength(0.5))
 	.force("center", d3.forceCenter(w/2, h/2))	// 设置布局参考位置居中
-	// .alphaTarget(0)
+	.alphaTarget(0)
 	.on("tick", ticked)
 	;
 
@@ -109,33 +109,34 @@ var G_simulation = d3.forceSimulation()
 var G_g = G_svg.select("#container");
 var G_links = G_g.select("#line-container").selectAll(".link");
 var G_nodes = G_g.select("#node-container").selectAll(".node");
-var G_cicles = G_g.selectAll("circle");
+
 var G_line_chart;
 var G_map_path = d3.select("#map").selectAll("path");
 
 
-var GD_data; 			// 后端数据
+// 后端数据
+var GD_data;
 var GD_nodes = [];
 var GD_links = [];
-var GD_wbids = []; 		//每个微博是一个节点, 它的索引和GD_nodes像对应
+// 每个微博是一个节点, 它的索引和 GD_nodes 相对应
+var GD_wbids = [];
 var GD_users = [];
-var GD_link_depth = {};
-var GD_node_level = {};
+var GD_total_users;
+
 var GD_prov = {"total": 0};		// 地图深度数据
 var GD_time_data = {
 	"days": []
 };
 
-// // 事件调度器
-// var G_dispatch = d3.dispatch("new_node_created");
-// G_dispatch.on('new_node_created', new_node_created);
+
 
 var G_time = {
 	'clock': 0,		// 时钟
 	'begin': 0,		// 布局开始时间
-	'end': 0,
+	'end': 0,		// 布局停止在真实的哪个时间点
 	'total': 0,
-	'unit': 1000,	// 多久循环一次
+	'unit': 1000,	// 多久循环一次, 单位ms, 毫秒
+	'gap': 60,		// 真实时间间隔: 单位s, 秒
 	'index': 0
 }
 var G_curr = {
@@ -148,7 +149,7 @@ initialize()
 GDObject = {};
 G_g.select('#node-container').on('mouseover', function(){
 	var d = GDObject[event.target.id];
-	update_curr_node_info(d);
+	// update_curr_node_info(d);
 	hilight_spread_path(d);
 });
 G_g.select('#node-container').on('mouseleave', function(){
