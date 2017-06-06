@@ -113,6 +113,10 @@ input {
 	stroke: #ffd400;
 	stroke-width: 3px;
 }
+.hover {
+	stroke: #ffd400;
+	stroke-width: 1.5;
+}
 .blur {
 	opacity: 0.2;
 }
