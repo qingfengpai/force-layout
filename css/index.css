@@ -123,14 +123,34 @@ input {
 .userid {
 	font-size: 10px;
 }
-.node {
-	opacity: 0.7;
-}
-.line {
+.link {
 	stroke: #444;
 	stroke-width: 1;
 	marker-end: url(#arrow);
 }
+.node {
+	opacity: 0.7;
+}
+
+.line {
+	fill: none;
+	stroke: #777;
+	stroke-width: 0.5;
+}
+.domain {
+	fill: none;
+	stroke: #777;
+	stroke-width: 2;
+}
+.axis {
+	fill: none;
+	stroke: #777;
+}
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+
 
 @keyframes fly {
 	from { stroke-dashoffset: 0;  }

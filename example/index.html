@@ -17,14 +17,16 @@
 				<li id="predict" class="btn blue-btn">转发预测</li>
 			</ul>
 		</div>
-		<svg id="retweet" width="1024" height="720">
-			<!-- 图 -->
+		<!-- <svg id="retweet" width="1024" height="720"> -->
+		<svg id="retweet" width="1024" height="120">
 			<g id="container">
 				<g id="line-container"></g>
 				<g id="node-container"></g>
 			</g>
-			<!-- 箭头 -->
-			<!-- <defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#777"></path></marker></defs> -->
+			<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#444"></path></marker></defs>
+		</svg>
+		<svg id="line-chart-item">
+
 		</svg>
 		<div id="play" class="play" data-status="stop"></div>
 	</div>
@@ -32,6 +34,7 @@
 		<svg id="map" width="320" height="200"></svg>
 	</div>
 </div>
+
 <div id="modal" class="modal">
 	<img src="http://tva2.sinaimg.cn/crop.0.0.1080.1080.320/59405d86jw8et8bu6uo80j20u00u0wge.jpg" id="avatar" class="avatar">
 	<div class="block">
