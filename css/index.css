@@ -164,6 +164,18 @@ input {
 	marker-end: url(#arrow);
 }
 
+.workbench {
+	position: relative;
+}
+.retweet-graph-container {
+
+}
+.line-chart-container {
+	position: absolute;
+	bottom: 0;
+	z-index: -1;
+}
+
 /**
  * 操作
  */
@@ -187,6 +199,7 @@ input {
 	position: absolute;
 	bottom: 15px;
 	left: 15px;
+	/*right: 15px;*/
 	height: 30px;
 	width: 30px;
 	background-repeat: no-repeat;

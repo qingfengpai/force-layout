@@ -4,11 +4,11 @@
 <title>index</title>
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="../css/index.css">
-<script src="../lib/d3-v4.7.4.min.js"></script>
+<script src="../lib/d3-4.7.4.js"></script>
 </head>
 <body>
 <div class="container">
-	<div class="col-9">
+	<div class="col-9 workbench">
 		<div class="operation">
 			<input type="search" id="search" class="col-6 search" placeholder="搜索用户ID" data-status="false">
 			<ul id="operation">
@@ -17,17 +17,18 @@
 				<li id="predict" class="btn blue-btn">转发预测</li>
 			</ul>
 		</div>
-		<!-- <svg id="retweet" width="1024" height="720"> -->
-		<svg id="retweet" width="1024" height="120">
-			<g id="container">
-				<g id="line-container"></g>
-				<g id="node-container"></g>
-			</g>
-			<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#444"></path></marker></defs>
-		</svg>
-		<svg id="line-chart-item">
-
-		</svg>
+		<div class="retweet-graph-container">
+			<svg id="retweet" width="1024" height="720">
+				<g id="container">
+					<g id="line-container"></g>
+					<g id="node-container"></g>
+				</g>
+				<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#444"></path></marker></defs>
+			</svg>
+		</div>
+		<div class="line-chart-container">
+			<svg id="line-chart-item"></svg>
+		</div>
 		<div id="play" class="play" data-status="stop"></div>
 	</div>
 	<div class="col-3">
