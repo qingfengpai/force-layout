@@ -7,33 +7,40 @@
 <script src="../lib/d3-4.7.4.js"></script>
 </head>
 <body>
-<div class="container">
-	<div class="col-9 workbench">
-		<div class="operation">
-			<input type="search" id="search" class="col-6 search" placeholder="搜索用户ID" data-status="false">
-			<ul id="operation">
-				<li id="path" class="btn blue-btn">传播路径</li>
-				<li id="info" class="btn blue-btn">节点信息</li>
-				<li id="predict" class="btn blue-btn">转发预测</li>
-			</ul>
-		</div>
-		<div class="retweet-graph-container">
-			<svg id="retweet" width="1024" height="720">
-				<g id="container">
-					<g id="line-container"></g>
-					<g id="node-container"></g>
-				</g>
-				<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#444"></path></marker></defs>
-			</svg>
-		</div>
-		<div class="line-chart-container">
-			<svg id="line-chart-item"></svg>
-		</div>
-		<div id="play" class="play" data-status="stop"></div>
-	</div>
+<div class="workbench row">
 	<div class="col-3">
-		<svg id="map" width="320" height="200"></svg>
+		<img src="../img/logo.png" alt="" class="logo">
+		<h1 class="title">微博转发预测系统</h1>
 	</div>
+	<div class="col-2">
+		<input type="search" id="search" class="search" placeholder="搜索用户ID" data-status="false">
+	</div>
+	<ul id="operation" class="col-4 operation">
+		<li id="path" class="btn blue-btn">传播路径</li>
+		<li id="info" class="btn blue-btn">节点信息</li>
+		<li id="predict" class="btn blue-btn">转发预测</li>
+	</ul>
+	<div class="col-3">
+		<select id="select" class="btn select">
+			<option value="1"> 1 秒 = 1分钟</option>
+			<option value="5"> 1 秒 = 5分钟</option>
+			<option value="10"> 1 秒 = 10分钟</option>
+		</select>
+		<button id="chart-switch" class="btn blue-btn" data-status="show">隐藏曲线图</button>
+	</div>
+	<div id="play" class="play" data-status="stop"></div>
+</div>
+<div id="retweet-graph-container" class="retweet-graph-container">
+	<svg id="retweet-graph" class="retweet-graph">
+		<g id="container">
+			<g id="line-container"></g>
+			<g id="node-container"></g>
+		</g>
+		<defs><marker id="arrow" markerUnits="strokeWidth" markerWidth="6" markerHeight="12" viewBox="0 0 12 12" refX="18" refY="6" orient="auto"><path d="M2,2 L10,6 L2,10 L6,6 L2,2" fill="#444"></path></marker></defs>
+	</svg>
+</div>
+<div class="line-chart-container">
+	<svg id="line-chart-item"></svg>
 </div>
 
 <div id="modal" class="modal">

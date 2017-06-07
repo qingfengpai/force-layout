@@ -4,7 +4,7 @@
 }
 body {
 	background: black;
-	color: white;
+	color: #13227a;
 	font-size: 14px;
 }
 input {
@@ -25,47 +25,32 @@ input {
 	-o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 	transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 }
+.row:before,
+.row:after {
+	display: table;
+    content: " ";
+}
+.row {
+	clear: both;
+}
 .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12 {
 	float: left;
 	position: relative;
 	min-height: 1px;
 }
-.col-12 {
-	width: 100%;
-}
-.col-11 {
-	width: 91.66666667%;
-}
-.col-10 {
-	width: 83.33333333%;
-}
-.col-9 {
-	width: 75%;
-}
-.col-8 {
-	width: 66.66666667%;
-}
-.col-7 {
-	width: 58.33333333%;
-}
-.col-6 {
-	width: 50%;
-}
-.col-5 {
-	width: 41.66666667%;
-}
-.col-4 {
-	width: 33.33333333%;
-}
-.col-3 {
-	width: 25%;
-}
-.col-2 {
-	width: 16.66666667%;
-}
-.col-1 {
-	width: 8.33333333%;
-}
+.col-0 { float: left; }
+.col-12 { width: 100%; }
+.col-11 { width: 91.66666667%; }
+.col-10 { width: 83.33333333%; }
+.col-9 { width: 75%; }
+.col-8 { width: 66.66666667%; }
+.col-7 { width: 58.33333333%; }
+.col-6 { width: 50%; }
+.col-5 { width: 41.66666667%; }
+.col-4 { width: 33.33333333%; }
+.col-3 { width: 25%; }
+.col-2 { width: 16.66666667%; }
+.col-1 { width: 8.33333333%; }
 .btn {
 	display: inline-block;
 	padding: 6px 12px;
@@ -88,16 +73,92 @@ input {
 	border-radius: 4px;
 }
 .blue-btn {
-	color: #60cad7;
+	color: #13227a;
 	background: #000;
 	margin-left: 10px;
+	font-weight: bold;
+    font-size: 16px;
 }
 .close-btn {
 	color: #d76060;
 	background: #000;
 }
+.center {
+    text-align: center;
+}
 
 
+/**
+ * 操作台
+ */
+.workbench {
+	position: relative;
+	padding: 15px;
+}
+.logo {
+    vertical-align: bottom;
+}
+.title {
+	display: inline;
+	margin-left: 10px;
+}
+.operation {
+	margin-top: 3px;
+}
+.search {
+	margin-top: 5px;
+	background: #000;
+	border: 2px solid rgb(10, 30, 54);
+}
+.curr {
+	text-decoration: underline;
+	color: #6b6ecf;
+}
+.select {
+	color: #13227a;
+    background: #000;
+    border: 2px solid #13227a;
+}
+/**
+ * 暂停按钮
+ */
+.play {
+	position: fixed;
+    bottom: 15px;
+    left: 15px;
+	height: 30px;
+	width: 30px;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-image: url(../img/start-48.png);
+}
+.hide {
+	display: none;
+}
+
+.visible-on {
+	visibility: visible;
+	opacity: 1;
+}
+.visible-off {
+	visibility: hidden;
+	opacity: 0;
+}
+
+/**
+ * node-link graph
+ */
+.retweet-graph-container {
+    position: absolute;
+    top: 65px;
+    bottom: 15px;
+    left: 15px;
+    right: 315px;
+    z-index: 2;
+}
+.retweet-graph {
+	display: block;
+}
 @keyframes show {
 	from { opacity: 0; }
 	to { opacity: 1; }
@@ -131,7 +192,27 @@ input {
 .node {
 	opacity: 0.7;
 }
+@keyframes fly {
+	from { stroke-dashoffset: 0;  }
+	to { stroke-dashoffset: 20px; }
+}
+.predict {
+	animation: blink 1s linear infinite alternate;
+	stroke: #555;
+	stroke-width: 1;
+	stroke-dasharray: 3;
+	marker-end: url(#arrow);
+}
 
+/**
+ * curve-chart
+ */
+.line-chart-container {
+	position: absolute;
+	bottom: 0;
+	left: 50px;
+	z-index: -1;
+}
 .line {
 	fill: none;
 	stroke: #777;
@@ -151,71 +232,12 @@ input {
     stroke: #fff;
 }
 
-
-@keyframes fly {
-	from { stroke-dashoffset: 0;  }
-	to { stroke-dashoffset: 20px; }
-}
-.predict {
-	animation: blink 1s linear infinite alternate;
-	stroke: #555;
-	stroke-width: 1;
-	stroke-dasharray: 3;
-	marker-end: url(#arrow);
-}
-
-.workbench {
-	position: relative;
-}
-.retweet-graph-container {
-
-}
-.line-chart-container {
-	position: absolute;
-	bottom: 0;
-	z-index: -1;
-}
-
-/**
- * 操作
- */
-.operation {
-	margin-top: 10px;
-}
-.search {
-	background: #000;
-	color: rgb(96, 202, 215);
-	border: 2px solid rgb(10, 30, 54);
-}
-.curr {
-	text-decoration: underline;
-	color: #6b6ecf;
-}
-
-/**
- * 暂停按钮
- */
-.play {
-	position: absolute;
-	bottom: 15px;
-	left: 15px;
-	/*right: 15px;*/
-	height: 30px;
-	width: 30px;
-	background-repeat: no-repeat;
-	background-size: cover;
-	background-image: url(../img/start-48.png);
-}
-.hide {
-	display: none;
-}
-
-
 /*
  * 弹出框
  */
 .modal {
     position: absolute;
+    z-index: 3;
     bottom: 10px;
     right: 10px;
     width: 280px;
@@ -245,6 +267,9 @@ input {
 	color: #0a8236;
 }
 
+/**
+ * loading gif
+ */
 .loading {
     position: absolute;
     top: 0;
@@ -255,8 +280,4 @@ input {
 }
 .loading-img {
 	margin: 374px auto 0;
-}
-
-.center {
-    text-align: center;
 }
